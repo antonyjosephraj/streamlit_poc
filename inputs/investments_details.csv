@@ -1,0 +1,4 @@
+﻿Scenario (choice),Date of Investment,Invested Amount,EBITDA at entry,EBITDA at Exit,Multiple at Entry,Multiple at Exit,,Return (calculated),IRR (calculated)
+Base case,01-01-2021," 1,000 ", 100 , 200 ,5,10,,2.0x,
+Low Case,01-02-2021," 2,000 ", 200 , 300 ,6,7,,2.5x,
+High Case,01-03-2021," 3,000 ", 300 , 900 ,5,10,,4.0x,
