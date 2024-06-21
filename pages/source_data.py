@@ -49,7 +49,6 @@ column_values_list = investments_details_edited_df['Scenario'].tolist()
 column_values_values = investments_details_edited_df['EBITDA at Exit'].tolist()
 column_values_values2 = investments_details_edited_df['Multiple at Exit'].tolist()
 
-
 # st.write(column_values_list)
 
 data2 = {
@@ -70,22 +69,138 @@ data3 = {
 }
 data_v3 = pd.DataFrame(data3)
 data_v3[column_values_list] = None
-# data_v3_edited_df = st.data_editor(data_v3, hide_index=-1)
 
-# data4 = {
-#     'Calc': ['Equity'],
-#     'Entry': [None]
-# }
-# data_v4 = pd.DataFrame(data4)
-# st.write(data_v2)
 
+# FUNCTIONS
+def calculate_equity(df, case):
+    arr_rev_ebitda = df.loc[df['Calc'] == 'ARR /Rev /EBITDA', case].values[0]
+    multiple = df.loc[df['Calc'] == 'Multiple', case].values[0]
+    net_debt = df.loc[df['Calc'] == 'Net Debt', case].values[0]
+    cash_flow_adj = df.loc[df['Calc'] == 'Cash flow adj', case].values[0]
+
+    if isinstance(arr_rev_ebitda, list):
+        arr_rev_ebitda = int(arr_rev_ebitda[0])
+    if isinstance(multiple, list):
+        multiple = int(multiple[0]) 
+
+    net_debt = 0 if net_debt == None else net_debt
+    cash_flow_adj = 0 if cash_flow_adj == None else cash_flow_adj
+    a = int(arr_rev_ebitda * multiple)
+    b = int(int(net_debt) + int(cash_flow_adj))
+    result = a + b
+    return result
+
+def calculate_value(df, case):
+    equity = df.loc[df['Calc'] == 'Equity', case].values[0]
+    ownership = df.loc[df['Calc'] == 'Ownership %', case].values[0]
+
+    equity = 1 if equity == None else equity
+    ownership = 1 if ownership == None else ownership
+    return (int(equity) * int(ownership))
+
+
+def calculate_money_multiple(df, case):
+    value = df.loc[df['Calc'] == 'Value', case].values[0]
+    investments = df.loc[df['Calc'] == 'Investment', case].values[0]
+
+    value = 1 if value == None else value
+    investments = 1 if investments == None else investments
+
+    return str(value / investments) + 'x'
 
 
 # with st.container(height=300, border=True, backgroundColor='red'):
 with st.container(height=300, border=True):
     st.write(data_v2)
+    data_v3_edited_df = st.data_editor(data_v3)
 
-    data_v3_edited_df = st.data_editor(data_v3, hide_index=-1)
+    concatenated_df = pd.concat([data_v2, data_v3_edited_df], ignore_index=True)
+
+    # Calculate Equity for each case
+    equity_entry = calculate_equity(concatenated_df, 'Entry')
+    equity_low_case = calculate_equity(concatenated_df, 'Low Case')
+    equity_base_case = calculate_equity(concatenated_df, 'Base case')
+    equity_high_case = calculate_equity(concatenated_df, 'High Case')
+
+    equity_data = {
+        'Calc': ['Equity'],
+        'Entry':[equity_entry],
+        'Low Case':[equity_low_case],
+        'Base Case':[equity_base_case],
+        'High Case':[equity_high_case]
+    }
+
+    equity_df = pd.DataFrame(equity_data)
+
+    st.write(equity_df)
+
+    ownership_data = {
+        'Calc': ['Ownership %'],
+        'Entry': None,
+        'Low Case':None,
+        'Base Case':None,
+        'High Case':None
+    }
+
+    ownership_df = pd.DataFrame(ownership_data)
+
+    # st.write(ownership_df)
+    ownership_edited_df = st.data_editor(ownership_df)
+
+    concatenated_df_v2 = pd.concat([equity_df, ownership_edited_df], ignore_index=True)
+
+    # Calculate Equity for each case
+    value_entry = calculate_value(concatenated_df_v2, 'Entry')
+    value_low_case = calculate_value(concatenated_df_v2, 'Low Case')
+    value_base_case = calculate_value(concatenated_df_v2, 'Base Case')
+    value_high_case = calculate_value(concatenated_df_v2, 'High Case')
 
 
+    value_and_investment = {
+        'Calc': ['Value', 'Investment'],
+        'Entry':[value_entry, investments_at_entry],
+        'Low Case':[value_low_case, investments_at_entry],
+        'Base Case':[value_base_case, investments_at_entry],
+        'High Case':[value_high_case, investments_at_entry]
+    }
+
+    value_and_investment_df = pd.DataFrame(value_and_investment)
+    st.write(value_and_investment_df)
+
+
+        # Calculate Equity for each case
+    money_multiple_entry = calculate_money_multiple(value_and_investment_df, 'Entry')
+    money_multiple_low_case = calculate_money_multiple(value_and_investment_df, 'Low Case')
+    money_multiple_base_case = calculate_money_multiple(value_and_investment_df, 'Base Case')
+    money_multiple_high_case = calculate_money_multiple(value_and_investment_df, 'High Case')
+
+
+    money_multiple = {
+        'Calc': ['Money Multiple'],
+        'Entry':[money_multiple_entry],
+        'Low Case':[money_multiple_low_case],
+        'Base Case':[money_multiple_base_case],
+        'High Case':[money_multiple_high_case]
+    }
+
+    money_multiple_df = pd.DataFrame(money_multiple)
+    st.write(money_multiple_df)
+
+
+st.subheader(':blue[Reurn Revenue:]')
+
+money_multiple_value = money_multiple_df.iloc[0].tolist()
+
+revenue_return = {
+    'Return (calculated)': money_multiple_value[2:],
+    'IRR (calculated)': [200, 10, 10 ]
+}
+revenue_return_df = pd.DataFrame(revenue_return)
+
+st.write(revenue_return_df)
+
+
+
+
+# =XIRR(C22:C69,B22:B69,0.2)
 
