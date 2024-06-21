@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-
+import numpy_financial as npf
 
 # Investments
 st.subheader(':blue[Investments:]')
@@ -11,7 +11,9 @@ investments_edited_df = st.data_editor(investments)
 # Investments Details
 st.subheader(':blue[Investments Details:]')      
 investments_details = pd.read_csv('./inputs/investments_details.csv') 
+# investments_details.loc[investments_details['Scenario'] == 'Low Case', 'Invested Amount'] = 30000
 investments_details_edited_df = st.data_editor(investments_details)
+print('ppppppppppppppppp', investments_details_edited_df)
 # investments_details_edited_df = st.data_editor(investments_details, num_rows="dynamic")
 
 # Calculations
@@ -38,12 +40,24 @@ date_range = pd.date_range(start=min_date, end=max_date, freq='M')
 assumptions = pd.DataFrame(date_range, columns=['Date'])
 assumptions['Date'] = pd.to_datetime(assumptions['Date'], format='%Y-%m-%d').dt.strftime('%Y-%m-%d')
 assumptions[["Low Case" ,"Base Case" ,"High Case" ,"Comments"]] = None
-assumptions.loc[0, ["Low Case" ,"Base Case" ,"High Case"]] = [-investments_at_entry ,-investments_at_entry ,-investments_at_entry]
+assumptions.loc[0, ["Low Case" ,"Base Case" ,"High Case"]] = [ -investments_at_entry ,-investments_at_entry ,-investments_at_entry]
 # st.write(assumptions)
 assumptions_edited_df = st.data_editor(assumptions)
 
-st.subheader(':blue[Valuation Waterfall Output:]')
+investment_update = assumptions_edited_df
 
+low_case_sum_of_negatives = investment_update[investment_update['Low Case'] < 0]['Low Case'].sum()
+base_case_sum_of_negatives = investment_update[investment_update['Base Case'] < 0]['Base Case'].sum()
+high_case_sum_of_negatives = investment_update[investment_update['High Case'] < 0]['High Case'].sum()
+
+investments_details_edited_df.loc[investments_details_edited_df['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
+investments_details_edited_df.loc[investments_details_edited_df['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
+investments_details_edited_df.loc[investments_details_edited_df['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
+
+
+st.write(investments_details_edited_df)
+
+st.subheader(':blue[Valuation Waterfall Output:]')
 
 column_values_list = investments_details_edited_df['Scenario'].tolist()
 column_values_values = investments_details_edited_df['EBITDA at Exit'].tolist()
@@ -187,20 +201,41 @@ with st.container(height=300, border=True):
     st.write(money_multiple_df)
 
 
-st.subheader(':blue[Reurn Revenue:]')
+st.subheader(':blue[Return Revenue:]')
 
 money_multiple_value = money_multiple_df.iloc[0].tolist()
 
+# IRR
+df3 = assumptions_edited_df
+
+df3['Low Case'] = pd.to_numeric(df3['Low Case'], errors='coerce')
+df3['Base Case'] = pd.to_numeric(df3['Base Case'], errors='coerce')
+df3['High Case'] = pd.to_numeric(df3['High Case'], errors='coerce')
+
+# # Calculate days from the start date for each cash flow
+df3['Date'] = pd.to_datetime(df3['Date'])
+
+df3['Days'] = (df3['Date'] - df3['Date'].iloc[0]).dt.days
+
+# Adjusted cash flows considering time value of money
+df3['Low Case Cash Flow'] = df3['Low Case'] / (1 + 0.05)**(df3['Days'] / 365)
+df3['Low Case Cash Flow'] = df3['Low Case Cash Flow'].fillna(1)
+
+df3['Base Case Cash Flow'] = df3['Base Case'] / (1 + 0.05)**(df3['Days'] / 365)
+df3['Base Case Cash Flow'] = df3['Base Case Cash Flow'].fillna(1)
+
+df3['High Case Cash Flow'] = df3['High Case'] / (1 + 0.05)**(df3['Days'] / 365)
+df3['High Case Cash Flow'] = df3['High Case Cash Flow'].fillna(1)
+
+# Calculate IRR based on adjusted cash flows
+low_case_irr = npf.irr(df3['Low Case Cash Flow'])
+base_case_irr = npf.irr(df3['Low Case Cash Flow'])
+high_case_irr = npf.irr(df3['Low Case Cash Flow'])
+
 revenue_return = {
     'Return (calculated)': money_multiple_value[2:],
-    'IRR (calculated)': [200, 10, 10 ]
+    'IRR (calculated)': [low_case_irr, base_case_irr, high_case_irr ]
 }
 revenue_return_df = pd.DataFrame(revenue_return)
 
 st.write(revenue_return_df)
-
-
-
-
-# =XIRR(C22:C69,B22:B69,0.2)
-
