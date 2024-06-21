@@ -183,7 +183,7 @@ def main():
         value = 1 if value == None else value
         investments = 1 if investments == None else investments
 
-        return str(value / investments) + 'x'
+        return str(value / investments) + 'x' 
 
 
     # with st.container(height=300, border=True, backgroundColor='red'):
