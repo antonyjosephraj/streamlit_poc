@@ -40,8 +40,6 @@ def main():
     # print('investments_details_edited_df \n', investments_details_edited_df['Exit Date'])
     # print('max_date \n', max_date)
 
-    print('max_date', max_date)
-
     # Assumptions
     st.subheader(':blue[Casual Assumptions:]')      
     # columns = ["Date" ,"Low Case" ,"Base Case" ,"High Case" ,"Comments"]
@@ -60,8 +58,6 @@ def main():
 
     assumptions_edited_df_v2 = de(ss.assumptions_data)
 
-    st.write(ss)
-
     # assumptions_edited_df = st.data_editor(assumptions)
 
     investment_update = assumptions_edited_df_v2
@@ -72,7 +68,6 @@ def main():
 
 
     if not ss.assumptions_data.equals(assumptions_edited_df_v2):
-        print('22222222222')
         ss.assumptions_data = assumptions_edited_df_v2
         # ss.investments_data.loc[ss.investments_data['Invested Amount'].notna(), 'Multiple at Exit'] = ss.investments_data['Invested Amount']
         ss.investments_data.loc[ss.investments_data['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
@@ -85,7 +80,6 @@ def main():
 
 
     if not ss.investments_data.equals(investments_details_v2):
-        # print('Antony')
         ss.investments_data = investments_details_v2
 
         max_date = ss.investments_data['Exit Date'].max()
@@ -97,8 +91,6 @@ def main():
         ss.assumptions_data['Date'] = pd.to_datetime(ss.assumptions_data['Date'], format='%Y-%m-%d').dt.strftime('%Y-%m-%d')
         ss.assumptions_data[["Low Case" ,"Base Case" ,"High Case" ,"Comments"]] = None
         merged_df = pd.merge(ss.assumptions_data, sample_data, on=['Date'], suffixes=('_df1', '_df2'), how='left')
-
-        print('llllllll', merged_df )
 
         # Update 'Salary' in df1 where 'Salary_df2' is not NaN (indicating a match)
         merged_df['Low Case'] = merged_df.apply(lambda row: row['Low Case_df2'] if not pd.isna(row['Low Case_df2']) else row['Low Case_df1'], axis=1)
