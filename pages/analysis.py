@@ -32,19 +32,39 @@ import pandas as pd
 start_data = {'A': [None, None], 'B': [3, 8], 'C': [None, None]}
 
 
-if 'start_df' not in ss:
-    ss.start_df = pd.DataFrame(start_data)
-    ss.start_df['A'] = pd.to_numeric(ss.start_df['A'], errors='coerce').astype('Int64')
+
+# Investments Details
+st.subheader(':blue[Investments Details:]')      
+investments_details = pd.read_csv('./inputs/investments_details.csv') 
+
+if 'investments_data' not in ss:
+    ss.investments_data = pd.DataFrame(investments_details)
+    # ss.investments_data['Invested Amount'] = pd.to_numeric(ss.investments_data['Invested Amount'], errors='coerce').astype('Int64')
 
 
 def main():
+    if 'start_df' not in ss:
+        ss.start_df = pd.DataFrame(start_data)
+        ss.start_df['A'] = pd.to_numeric(ss.start_df['A'], errors='coerce').astype('Int64')
+
+
     edited_df = de(ss.start_df, num_rows='dynamic')
 
     if not ss.start_df.equals(edited_df):
+        # print('Antony')
         ss.start_df = edited_df
         ss.start_df.loc[ss.start_df['A'].notna(), 'C'] = ss.start_df['A'] + ss.start_df['B']
         rr()
 
+    investments_details_v2 = de(ss.investments_data)
+
+    if not ss.investments_data.equals(investments_details_v2):
+        ss.investments_data = investments_details_v2
+        ss.investments_data.loc[ss.investments_data['Invested Amount'].notna(), 'Multiple at Exit'] = ss.investments_data['Invested Amount']
+        rr()
+
+
+st.write(ss)
 
 if __name__ == '__main__':
     main()
