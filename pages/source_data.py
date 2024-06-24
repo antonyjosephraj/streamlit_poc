@@ -10,7 +10,13 @@ def main():
     # Investments
     st.subheader(':blue[Investments:]')
     investments = pd.read_csv('./inputs/investments.csv')
-    investments_edited_df = st.data_editor(investments)
+    investments['Date of Investment'] = pd.to_datetime(investments['Date of Investment'], format='%d-%m-%Y').dt.strftime('%Y-%m-%d')
+    # investments_edited_df = st.data_editor(investments)
+
+    if 'investments_amount' not in ss:
+        ss.investments_amount = pd.DataFrame(investments)
+
+    investments_edited_df = de(ss.investments_amount)
 
     # Investments Details
     st.subheader(':blue[Investments Details:]')      
@@ -27,9 +33,9 @@ def main():
     # investments_details_edited_df = st.data_editor(investments_details, num_rows="dynamic")
 
     # Calculations
-    investments_edited_df['Date of Investment'] = pd.to_datetime(investments_edited_df['Date of Investment'], format='%d-%m-%Y').dt.strftime('%Y-%m-%d')
     min_date = investments_edited_df['Date of Investment'].min()
     investments_at_entry = investments_edited_df['Investment at entry'].sum()
+
 
     # print('investments_edited_df \n', investments_edited_df['Date of Investment'])
     # print('min_date \n', min_date)
@@ -79,7 +85,11 @@ def main():
     # investments_details.loc[investments_details['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
 
 
-    if not ss.investments_data.equals(investments_details_v2):
+    if not ss.investments_data.equals(investments_details_v2)  or not ss.investments_amount.equals(investments_edited_df):
+        ss.investments_amount = investments_edited_df
+        min_date = ss.investments_amount['Date of Investment'].min()
+        investments_at_entry = ss.investments_amount['Investment at entry'].sum()
+
         ss.investments_data = investments_details_v2
 
         max_date = ss.investments_data['Exit Date'].max()
