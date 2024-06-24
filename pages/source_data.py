@@ -292,8 +292,8 @@ def main():
 
     # Calculate IRR based on adjusted cash flows
     low_case_irr = npf.irr(df3['Low Case Cash Flow'])
-    base_case_irr = npf.irr(df3['Low Case Cash Flow'])
-    high_case_irr = npf.irr(df3['Low Case Cash Flow'])
+    base_case_irr = npf.irr(df3['Base Case Cash Flow'])
+    high_case_irr = npf.irr(df3['High Case Cash Flow'])
 
     revenue_return = {
         'Return (calculated)': money_multiple_value[2:],
@@ -302,7 +302,6 @@ def main():
     revenue_return_df = pd.DataFrame(revenue_return)
 
     st.write(revenue_return_df)
-
 
 if __name__ == '__main__':
     main()
