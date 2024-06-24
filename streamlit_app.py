@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 def creds_edtered():
     if st.session_state['user'].strip() == 'JMAN-Client' and st.session_state['pass'].strip() == 'JMAN-PoC':
