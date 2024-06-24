@@ -6,3 +6,4 @@ pandas-datareader
 prophet
 numpy
 numpy_financial
+streamlit-authenticator
