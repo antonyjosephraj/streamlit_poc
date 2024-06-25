@@ -9,23 +9,27 @@ def main():
 
     # Investments
     st.subheader(':blue[Investments:]')
-    investments = pd.read_csv('./inputs/investments.csv')
+    investments = pd.read_csv('./inputs/investments_v3.csv')
     investments['Date of Investment'] = pd.to_datetime(investments['Date of Investment'], format='%d-%m-%Y').dt.strftime('%Y-%m-%d')
     # investments_edited_df = st.data_editor(investments)
 
-    if 'investments_amount' not in ss:
-        ss.investments_amount = pd.DataFrame(investments)
+    if 'investments_amount_pf3' not in ss:
+        ss.investments_amount_pf3 = pd.DataFrame(investments)
 
-    investments_edited_df = de(ss.investments_amount)
+    investments_edited_df = de(ss.investments_amount_pf3)
+
+    def str_to_int(value_str):
+        return int(value_str.replace(',', ''))
 
     # Investments Details
     st.subheader(':blue[Investments Details:]')      
-    investments_details = pd.read_csv('./inputs/investments_details.csv') 
+    investments_details = pd.read_csv('./inputs/investments_details_v3.csv') 
     investments_details['Exit Date'] = pd.to_datetime(investments_details['Exit Date'], format='%m/%d/%Y').dt.strftime('%Y-%m-%d')
-    if 'investments_data' not in ss:
-        ss.investments_data = pd.DataFrame(investments_details)
+    investments_details['Invested Amount'] = investments_details['Invested Amount'].apply(lambda x: str_to_int(x))
+    if 'investments_data_pf3' not in ss:
+        ss.investments_data_pf3 = pd.DataFrame(investments_details)
 
-    investments_details_v2 = de(ss.investments_data)
+    investments_details_v2 = de(ss.investments_data_pf3)
 
     # investments_details.loc[investments_details['Scenario'] == 'Low Case', 'Invested Amount'] = 30000
     # investments_details_edited_df = st.data_editor(investments_details)
@@ -75,24 +79,24 @@ def main():
 
     if not ss.assumptions_data.equals(assumptions_edited_df_v2):
         ss.assumptions_data = assumptions_edited_df_v2
-        # ss.investments_data.loc[ss.investments_data['Invested Amount'].notna(), 'Multiple at Exit'] = ss.investments_data['Invested Amount']
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
+        # ss.investments_data_pf3.loc[ss.investments_data_pf3['Invested Amount'].notna(), 'Multiple at Exit'] = ss.investments_data_pf3['Invested Amount']
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
         rr()
     # investments_details.loc[investments_details['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
     # investments_details.loc[investments_details['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
     # investments_details.loc[investments_details['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
 
 
-    if not ss.investments_data.equals(investments_details_v2)  or not ss.investments_amount.equals(investments_edited_df):
-        ss.investments_amount = investments_edited_df
-        min_date = ss.investments_amount['Date of Investment'].min()
-        investments_at_entry = ss.investments_amount['Investment at entry'].sum()
+    if not ss.investments_data_pf3.equals(investments_details_v2)  or not ss.investments_amount_pf3.equals(investments_edited_df):
+        ss.investments_amount_pf3 = investments_edited_df
+        min_date = ss.investments_amount_pf3['Date of Investment'].min()
+        investments_at_entry = ss.investments_amount_pf3['Investment at entry'].sum()
 
-        ss.investments_data = investments_details_v2
+        ss.investments_data_pf3 = investments_details_v2
 
-        max_date = ss.investments_data['Exit Date'].max()
+        max_date = ss.investments_data_pf3['Exit Date'].max()
 
         sample_data = ss.assumptions_data
 
@@ -121,9 +125,9 @@ def main():
         base_case_sum_of_negatives = investment_update[investment_update['Base Case'] < 0]['Base Case'].sum()
         high_case_sum_of_negatives = investment_update[investment_update['High Case'] < 0]['High Case'].sum()
 
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
-        ss.investments_data.loc[ss.investments_data['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'Low Case', 'Invested Amount'] = abs(low_case_sum_of_negatives)
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'Base case', 'Invested Amount'] = abs(base_case_sum_of_negatives)
+        ss.investments_data_pf3.loc[ss.investments_data_pf3['Scenario'] == 'High Case', 'Invested Amount'] = abs(high_case_sum_of_negatives)
 
         rr()
 
@@ -312,6 +316,9 @@ def main():
     revenue_return_df = pd.DataFrame(revenue_return)
 
     st.write(revenue_return_df)
+
+    if 'revenue_return_pf3' not in ss:
+        ss.revenue_return_pf3 = revenue_return_df
 
 if __name__ == '__main__':
     main()
