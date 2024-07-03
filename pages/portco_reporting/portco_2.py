@@ -25,7 +25,7 @@ def main():
     st.subheader(':blue[Investments Details:]')      
     investments_details = pd.read_csv('./inputs/investments_details_v2.csv') 
     investments_details['Exit Date'] = pd.to_datetime(investments_details['Exit Date'], format='%m/%d/%Y').dt.strftime('%Y-%m-%d')
-    investments_details['Invested Amount'] = investments_details['Invested Amount'].apply(lambda x: str_to_int(x))
+    # investments_details['Invested Amount'] = investments_details['Invested Amount'].apply(lambda x: str_to_int(x))
     if 'investments_data_pf2' not in ss:
         ss.investments_data_pf2 = pd.DataFrame(investments_details)
 
@@ -176,7 +176,7 @@ def main():
 
         net_debt = 0 if net_debt == None else net_debt
         cash_flow_adj = 0 if cash_flow_adj == None else cash_flow_adj
-        a = int(arr_rev_ebitda * multiple)
+        a = int(arr_lrev_ebitda * multiple)
         b = int(int(net_debt) + int(cash_flow_adj))
         result = a + b
         return result

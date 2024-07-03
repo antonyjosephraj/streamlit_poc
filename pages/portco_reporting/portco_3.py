@@ -25,7 +25,7 @@ def main():
     st.subheader(':blue[Investments Details:]')      
     investments_details = pd.read_csv('./inputs/investments_details_v3.csv') 
     investments_details['Exit Date'] = pd.to_datetime(investments_details['Exit Date'], format='%m/%d/%Y').dt.strftime('%Y-%m-%d')
-    investments_details['Invested Amount'] = investments_details['Invested Amount'].apply(lambda x: str_to_int(x))
+    # investments_details['Invested Amount'] = investments_details['Invested Amount'].apply(lambda x: str_to_int(x))
     if 'investments_data_pf3' not in ss:
         ss.investments_data_pf3 = pd.DataFrame(investments_details)
 
